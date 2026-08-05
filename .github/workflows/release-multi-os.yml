@@ -41,7 +41,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libxdo-dev
 
       - name: Install Node Dependencies
         run: npm ci || npm install
@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.platform }}" == "windows" ]; then
-            ./scripts/build-desktop.bat
+            cmd.exe /c ./scripts/build-desktop.bat
           else
             chmod +x ./scripts/build-desktop.sh
             ./scripts/build-desktop.sh
