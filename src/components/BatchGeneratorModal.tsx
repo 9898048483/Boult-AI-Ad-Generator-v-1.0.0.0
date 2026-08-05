@@ -51,10 +51,10 @@ export const BatchGeneratorModal: React.FC<BatchGeneratorModalProps> = ({
     if (batchList.length === 0) parsePrompts();
     setIsProcessing(true);
 
-    const updatedList = [...(batchList.length > 0 ? batchList : promptsText.split('\n').filter(Boolean).map((p, idx) => ({
+    const updatedList: BatchItem[] = [...(batchList.length > 0 ? batchList : promptsText.split('\n').filter(Boolean).map((p, idx): BatchItem => ({
       id: `batch_${idx}_${Date.now()}`,
       prompt: p.replace(/^\d+[\.\)]\s*/, '').trim(),
-      status: 'idle' as const,
+      status: 'idle',
     })))];
 
     setBatchList(updatedList);

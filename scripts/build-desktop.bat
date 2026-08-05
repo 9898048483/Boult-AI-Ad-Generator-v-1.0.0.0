@@ -28,7 +28,7 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 0
 )
 
-call npx tauri build
+call npx @tauri-apps/cli build
 echo =========================================================
 echo SUCCESS! Windows Desktop Application built in src-tauri\target\release\bundle\
 echo =========================================================
