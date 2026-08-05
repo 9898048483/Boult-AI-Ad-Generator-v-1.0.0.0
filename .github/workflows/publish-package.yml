@@ -1,0 +1,79 @@
+name: Publish Package to GitHub Packages & NPM
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version Bump Type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Build & Publish Package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@9898048483'
+
+      - name: Configure Git Author
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Build Web & Server Dist Assets
+        run: npm run build
+
+      - name: Bump Version (Workflow Dispatch / Branch Push)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          BUMP_TYPE="${{ github.event.inputs.bump_type }}"
+          npm version $BUMP_TYPE -m "chore(release): %s [skip ci]"
+          git push --follow-tags || true
+
+      - name: Ensure Executable Permissions for CLI
+        run: chmod +x ./bin/boult-cli.js
+
+      - name: Publish to GitHub Packages
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npmjs.org (If NPM_TOKEN is provided)
+        if: secrets.NPM_TOKEN != ''
+        run: |
+          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
+          npm publish --registry=https://registry.npmjs.org/ --access public || true
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

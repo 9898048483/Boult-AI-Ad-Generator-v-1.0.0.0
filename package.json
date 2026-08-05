@@ -1,10 +1,18 @@
 {
-  "name": "boult-ai-ad-generator",
+  "name": "@9898048483/boult-ai-ad-generator",
   "version": "1.0.0",
   "type": "module",
-  "bin": {
-    "boult-cli": "./bin/boult-cli.js"
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
+  "bin": {
+    "boult-ai-ad": "./bin/boult-cli.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "package.json"
+  ],
   "scripts": {
     "dev": "tsx server.ts",
     "lint": "tsc --noEmit",
