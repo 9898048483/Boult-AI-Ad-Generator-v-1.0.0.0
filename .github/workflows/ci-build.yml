@@ -1,0 +1,95 @@
+name: BOULT AI Suite Multi-OS CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  web-and-cli-build:
+    name: Web & Node CLI Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Web Frontend & Server
+        run: npm run build
+      - name: Test CLI Execution
+        run: node ./bin/boult-cli.js --help
+
+  desktop-build-matrix:
+    name: Build Desktop (${{ matrix.os }})
+    needs: web-and-cli-build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux Dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Build Web Distribution
+        run: npm run build
+
+      - name: Execute Desktop Build Script
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            ./scripts/build-desktop.bat
+          else
+            chmod +x ./scripts/build-desktop.sh
+            ./scripts/build-desktop.sh
+          fi
+
+  android-apk-build:
+    name: Build Android APK
+    needs: web-and-cli-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Execute Android APK Script
+        run: |
+          chmod +x ./scripts/build-android.sh
+          ./scripts/build-android.sh

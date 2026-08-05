@@ -1,0 +1,47 @@
+{
+  "name": "boult-ai-ad-generator",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "boult-cli": "./bin/boult-cli.js"
+  },
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
+    "build:desktop": "bash scripts/build-desktop.sh",
+    "build:linux": "bash scripts/build-desktop.sh --platform linux",
+    "build:win": "scripts/build-desktop.bat",
+    "build:mac": "bash scripts/build-desktop.sh --platform macos",
+    "build:android": "bash scripts/build-android.sh",
+    "cli": "node bin/boult-cli.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.15.0",
+    "chalk": "^6.0.0",
+    "clsx": "^2.1.1",
+    "commander": "^15.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.28.0",
+    "ora": "^9.4.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "replicate": "^1.4.0",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "esbuild": "^0.28.1",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.8",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0"
+  }
+}

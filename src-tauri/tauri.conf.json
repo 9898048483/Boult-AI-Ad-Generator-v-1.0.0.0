@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
+  "productName": "BOULT AI Ad Generator Suite",
+  "version": "1.0.0",
+  "identifier": "com.boult.adgenerator",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "BOULT AI Ad Generator Studio",
+        "width": 1280,
+        "height": 840,
+        "resizable": true,
+        "fullscreen": false
+      },
+      {
+        "label": "canvas-studio",
+        "title": "BOULT 2D Canvas Editor",
+        "width": 1024,
+        "height": 768,
+        "resizable": true,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": null,
+      "capabilities": ["default", "dialog-save", "fs-write"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

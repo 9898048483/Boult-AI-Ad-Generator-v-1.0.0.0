@@ -1,0 +1,8 @@
+{
+  "name": "BOULT AI Ad Generator",
+  "description": "Generate high-end cinematic advertisement photos for BOULT audio gear and lifestyle products using AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

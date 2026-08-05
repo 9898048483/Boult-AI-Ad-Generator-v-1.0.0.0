@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  boult-ai-suite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: boult-ai-suite-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - REPLICATE_API_TOKEN=${REPLICATE_API_TOKEN:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/config"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+networks:
+  default:
+    name: boult-network
