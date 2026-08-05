@@ -29,8 +29,7 @@
       }
     ],
     "security": {
-      "csp": null,
-      "capabilities": ["default", "dialog-save", "fs-write"]
+      "csp": null
     }
   },
   "bundle": {

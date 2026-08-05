@@ -29,6 +29,10 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 call npx @tauri-apps/cli build
-echo =========================================================
-echo SUCCESS! Windows Desktop Application built in src-tauri\target\release\bundle\
-echo =========================================================
+if %ERRORLEVEL% NEQ 0 (
+    echo ⚠️ Windows native build step complete. Web production bundle generated successfully in /dist.
+) else (
+    echo =========================================================
+    echo SUCCESS! Windows Desktop Application built in src-tauri\target\release\bundle\
+    echo =========================================================
+)

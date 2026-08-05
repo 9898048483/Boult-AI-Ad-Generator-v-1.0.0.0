@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
+  "identifier": "default",
+  "description": "Default capabilities for BOULT AI Ad Generator Studio",
+  "windows": ["main", "canvas-studio"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-save",
+    "fs:allow-write"
+  ]
+}
