@@ -1,14 +1,25 @@
-name: BOULT AI Suite Automated Multi-OS Release Pipeline
+name: BOULT AI Suite Multi-OS CI/CD Pipeline
 
 on:
   push:
+    branches:
+      - main
+      - master
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
   workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   release-desktop:
-    name: Build Desktop Binary (${{ matrix.platform }})
+    name: Build Desktop (${{ matrix.platform }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -16,81 +27,49 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            artifact_name: Linux AppImage & Deb
-          - os: macos-latest
-            platform: macos
-            artifact_name: macOS DMG
           - os: windows-latest
             platform: windows
-            artifact_name: Windows Executable
+          - os: macos-latest
+            platform: macos
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (v22)
+      - name: Setup Node.js (v20)
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'npm'
 
       - name: Setup Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Linux Dependencies
-        if: matrix.platform == 'linux'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libxdo-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl libssl-dev libgtk-3-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install Node Dependencies
-        run: npm ci || npm install
+        run: npm ci
 
-      - name: Build Web Application Bundle
+      - name: Build Web Application Frontend
         run: npm run build
 
-      - name: Compile Desktop App (Tauri v2)
-        shell: bash
-        run: |
-          chmod +x ./scripts/build-desktop.sh
-          ./scripts/build-desktop.sh
+      - name: Build Tauri Desktop Application
+        run: npx tauri build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Desktop Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: boult-suite-${{ matrix.platform }}
+          name: boult-suite-desktop-${{ matrix.platform }}
           path: |
-            src-tauri/target/release/bundle/
-
-  release-android:
-    name: Build Android APK
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Install Node Dependencies
-        run: npm ci || npm install
-
-      - name: Build Android APK
-        run: |
-          chmod +x ./scripts/build-android.sh
-          ./scripts/build-android.sh
-
-      - name: Upload Android APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: boult-suite-android-apk
-          path: android/app/build/outputs/apk/release/*.apk
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.dmg
+          if-no-files-found: warn
