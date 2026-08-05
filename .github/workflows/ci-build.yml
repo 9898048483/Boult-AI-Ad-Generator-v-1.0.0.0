@@ -60,12 +60,8 @@ jobs:
       - name: Execute Desktop Build Script
         shell: bash
         run: |
-          if [ "${{ runner.os }}" == "Windows" ]; then
-            cmd.exe /c ./scripts/build-desktop.bat
-          else
-            chmod +x ./scripts/build-desktop.sh
-            ./scripts/build-desktop.sh
-          fi
+          chmod +x ./scripts/build-desktop.sh
+          ./scripts/build-desktop.sh
 
   android-apk-build:
     name: Build Android APK

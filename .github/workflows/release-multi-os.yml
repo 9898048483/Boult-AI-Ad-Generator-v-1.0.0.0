@@ -52,12 +52,8 @@ jobs:
       - name: Compile Desktop App (Tauri v2)
         shell: bash
         run: |
-          if [ "${{ matrix.platform }}" == "windows" ]; then
-            cmd.exe /c ./scripts/build-desktop.bat
-          else
-            chmod +x ./scripts/build-desktop.sh
-            ./scripts/build-desktop.sh
-          fi
+          chmod +x ./scripts/build-desktop.sh
+          ./scripts/build-desktop.sh
 
       - name: Upload Desktop Artifacts
         uses: actions/upload-artifact@v4
