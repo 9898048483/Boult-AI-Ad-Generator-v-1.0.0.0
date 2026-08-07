@@ -34,11 +34,11 @@ export const HistoryGallery: React.FC<HistoryGalleryProps> = ({
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {history.map((item) => {
+        {history.map((item, index) => {
           const isSelected = currentId === item.id;
           return (
             <div
-              key={item.id}
+              key={`${item.id}_${index}`}
               onClick={() => onSelectAd(item)}
               className={`group relative rounded-xl overflow-hidden border cursor-pointer transition-all aspect-square bg-slate-950 ${
                 isSelected

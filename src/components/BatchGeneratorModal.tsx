@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Layers, Play, CheckCircle2, AlertCircle, Download, FileText, Sparkles } from 'lucide-react';
 import { saveImageNative, downloadJsonFile } from '../utils/nativeFileSystem';
+import { dbService } from '../services/dbService';
 
 interface BatchGeneratorModalProps {
   isOpen: boolean;
@@ -59,14 +60,22 @@ export const BatchGeneratorModal: React.FC<BatchGeneratorModalProps> = ({
 
     setBatchList(updatedList);
 
+    const useCustomKey = await dbService.getSetting<boolean>('use_custom_gemini_api_key', false);
+    const customKey = await dbService.getSetting<string>('custom_gemini_api_key', '');
+
     for (let i = 0; i < updatedList.length; i++) {
       updatedList[i].status = 'loading';
       setBatchList([...updatedList]);
 
       try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (useCustomKey && customKey && customKey.trim()) {
+          headers['x-custom-api-key'] = customKey.trim();
+        }
+
         const res = await fetch('/api/generate-ad', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             prompt: updatedList[i].prompt,
             aspectRatio,

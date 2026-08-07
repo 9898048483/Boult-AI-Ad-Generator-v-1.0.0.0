@@ -1,3 +1,12 @@
+export interface UserProfile {
+  name: string;
+  email: string;
+  picture: string;
+  idToken: string;
+  sub: string;
+  loginTime: number;
+}
+
 export type AIProvider = 'auto' | 'replicate-flux-schnell' | 'replicate-flux-dev' | 'replicate-sdxl' | 'gemini-imagen3' | 'huggingface';
 
 export interface AdPromptConfig {
@@ -34,6 +43,7 @@ export interface AdGenerationRequest {
   prompt: string;
   aspectRatio?: '1:1' | '16:9' | '9:16' | '4:3';
   mode?: 'auto' | 'replicate' | 'gemini' | 'huggingface' | 'replicate-flux-dev' | 'replicate-sdxl';
+  selectedModel?: 'gemini-3.1-flash-lite-image' | 'imagen-3.0-generate-002' | 'flux-schnell' | 'studio-svg-fallback';
   replicateToken?: string;
   geminiKey?: string;
   hfToken?: string;
