@@ -78,8 +78,31 @@ export interface PresetPrompt {
   id: string;
   title: string;
   category: string;
+  filterCategory?: 'Indoor' | 'Outdoor' | 'Product-Focused' | string;
   prompt: string;
   iconName: string;
+}
+
+export interface PromptItem {
+  id: string;
+  label: string;
+  prompt: string;
+  tags?: string[];
+}
+
+export interface SubCategory {
+  id: string;
+  name: string;
+  description: string;
+  prompts: PromptItem[];
+}
+
+export interface MainCategory {
+  id: string;
+  name: string;
+  iconName: string;
+  description: string;
+  subcategories: SubCategory[];
 }
 
 export interface InpaintingConfig {

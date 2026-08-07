@@ -7,6 +7,7 @@ export const PRESET_PROMPTS: PresetPrompt[] = [
     id: 'boult-default',
     title: 'BOULT Original Studio Loft',
     category: 'Cinematic Studio',
+    filterCategory: 'Indoor',
     iconName: 'Sparkles',
     prompt: DEFAULT_PROMPT
   },
@@ -14,6 +15,7 @@ export const PRESET_PROMPTS: PresetPrompt[] = [
     id: 'cyberpunk-neon',
     title: 'Cyberpunk Neon Street',
     category: 'Urban Vibes',
+    filterCategory: 'Outdoor',
     iconName: 'Zap',
     prompt: "Ultra-detailed 8K cyberpunk advertisement photo of sleek futuristic BOULT true wireless gaming earbuds hovering inside a glowing glass pod. Rainy Tokyo street background at night with intense cyan and neon purple reflections. Neon typography on billboard reading 'BOULT UNLEASH THE SOUND'."
   },
@@ -21,6 +23,7 @@ export const PRESET_PROMPTS: PresetPrompt[] = [
     id: 'fitness-runner',
     title: 'High-Energy Fitness & Sports',
     category: 'Fitness & Action',
+    filterCategory: 'Outdoor',
     iconName: 'Activity',
     prompt: "Dynamic commercial photography of a athletic runner during golden hour sunset on a high-tech running track, wearing matte black BOULT waterproof sports neckband. Sweat droplets captured in ultra motion-blur, atmospheric sunlight lens flare. Clean modern text in background: 'BOULT: UNSTOPPABLE BEATS'."
   },
@@ -28,6 +31,7 @@ export const PRESET_PROMPTS: PresetPrompt[] = [
     id: 'luxury-minimalist',
     title: 'Minimalist Luxury Matte White',
     category: 'Luxury Minimal',
+    filterCategory: 'Product-Focused',
     iconName: 'Crown',
     prompt: "Commercial luxury product shot of BOULT active noise cancelling over-ear headphones rest on a polished black marble slab surrounded by architectural concrete forms and dramatic soft studio lighting with warm champagne accents. Elegant tagline 'BOULT PURE AUDIO' carved smoothly on wall."
   },
@@ -35,6 +39,7 @@ export const PRESET_PROMPTS: PresetPrompt[] = [
     id: 'smartwatch-vibes',
     title: 'BOULT Luxury Smartwatch Pod',
     category: 'Wearables',
+    filterCategory: 'Product-Focused',
     iconName: 'Watch',
     prompt: "Close-up macro advertisement photo of a BOULT metallic bezel smartwatch with vivid AMOLED display floating over swirling deep blue silk fabric. Warm rim lights highlighting precision metallic edges and subtle water droplets. Sleek floating text: 'BOULT TIME FOR PERFECTION'."
   },
@@ -42,7 +47,32 @@ export const PRESET_PROMPTS: PresetPrompt[] = [
     id: 'party-boombox',
     title: 'Neon RGB Party Speaker',
     category: 'Lifestyle',
+    filterCategory: 'Indoor',
     iconName: 'Music',
     prompt: "Atmospheric nightlife ad shot of a powerful BOULT wireless RGB party speaker placed on a DJ console in a rooftop lounge. Dynamic purple and amber smoke particle effects, energetic crowd bokeh in background. Crisp lighting on speaker mesh with brand tagline 'BOULT: AMP YOUR VIBE'."
+  },
+  {
+    id: 'coffee-shop-workstation',
+    title: 'Artisanal Cafe Workstation',
+    category: 'Café & Office',
+    filterCategory: 'Indoor',
+    iconName: 'Sparkles',
+    prompt: "Cozy commercial photo of a warm coffee shop desk with a ceramic espresso cup, notebook, and matte black BOULT noise-canceling headphones resting on a reclaimed wood table. Soft morning sunlight streaming through industrial window frames."
+  },
+  {
+    id: 'golden-hour-beach',
+    title: 'Golden Hour Sunset Beach',
+    category: 'Nature & Travel',
+    filterCategory: 'Outdoor',
+    iconName: 'Zap',
+    prompt: "Breathtaking outdoor commercial shot of BOULT waterproof Bluetooth speaker on golden sand during a warm ocean sunset. Soft ocean spray particles, palms blurred in background with warm glowing lens flare."
+  },
+  {
+    id: 'macro-earbuds-podium',
+    title: 'Macro Water Droplet Glass Display',
+    category: 'Studio Macro',
+    filterCategory: 'Product-Focused',
+    iconName: 'Crown',
+    prompt: "Ultra macro studio advertisement photo focusing on BOULT metallic earbuds sitting on a frosted glass pedestal. Crystal clear water droplets on metallic casing, razor-sharp focus with soft studio gradient background."
   }
 ];

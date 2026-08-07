@@ -1,3 +1,5 @@
+import { NanoPrompt } from '../data/nanoBananaPrompts';
+
 export interface AdRecord {
   id: string;
   title: string;
@@ -219,6 +221,46 @@ class DBService {
     } catch {
       return defaultValue;
     }
+  }
+
+  // --- Nano Banana Favorite & Custom Prompts ---
+  public async getFavoriteBananaPrompts(): Promise<string[]> {
+    return this.getSetting<string[]>('favorite_banana_prompts', []);
+  }
+
+  public async toggleFavoriteBananaPrompt(promptId: string): Promise<string[]> {
+    const current = await this.getFavoriteBananaPrompts();
+    const exists = current.includes(promptId);
+    const updated = exists ? current.filter((id) => id !== promptId) : [...current, promptId];
+    await this.saveSetting('favorite_banana_prompts', updated);
+    return updated;
+  }
+
+  public async getCustomBananaPrompts(): Promise<NanoPrompt[]> {
+    return this.getSetting<NanoPrompt[]>('custom_banana_prompts', []);
+  }
+
+  public async saveCustomBananaPrompt(promptObj: NanoPrompt): Promise<NanoPrompt[]> {
+    const current = await this.getCustomBananaPrompts();
+    const updated = [promptObj, ...current];
+    await this.saveSetting('custom_banana_prompts', updated);
+    return updated;
+  }
+
+  public async deleteCustomBananaPrompt(promptId: string): Promise<NanoPrompt[]> {
+    const current = await this.getCustomBananaPrompts();
+    const updated = current.filter((p) => p.id !== promptId);
+    await this.saveSetting('custom_banana_prompts', updated);
+    return updated;
+  }
+
+  // --- Cached Nano Banana Prompts Dataset ---
+  public async saveCachedBananaPrompts(prompts: NanoPrompt[]): Promise<void> {
+    await this.saveSetting('cached_nano_banana_prompts', prompts);
+  }
+
+  public async getCachedBananaPrompts(): Promise<NanoPrompt[]> {
+    return this.getSetting<NanoPrompt[]>('cached_nano_banana_prompts', []);
   }
 
   // --- Canvas Layers Operations ---

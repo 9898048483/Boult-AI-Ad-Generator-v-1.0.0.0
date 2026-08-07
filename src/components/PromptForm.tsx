@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Sparkles, Wand2, Image, Monitor, Smartphone, LayoutGrid, Cpu, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Sparkles, Wand2, Image, Monitor, Smartphone, LayoutGrid, Cpu } from 'lucide-react';
 import { AdGenerationRequest } from '../types';
+import { QuickPrompts } from './QuickPrompts';
 
 export type ModelOptionId = 'gemini-3.1-flash-lite-image' | 'imagen-3.0-generate-002' | 'flux-schnell' | 'studio-svg-fallback';
 
@@ -13,6 +14,7 @@ interface PromptFormProps {
   isEnhancing: boolean;
   selectedModel: ModelOptionId;
   onSelectModel: (model: ModelOptionId) => void;
+  onOpenNanoBananaGallery?: () => void;
 }
 
 export const MODEL_OPTIONS: {
@@ -61,6 +63,7 @@ export const PromptForm: React.FC<PromptFormProps> = ({
   isEnhancing,
   selectedModel,
   onSelectModel,
+  onOpenNanoBananaGallery,
 }) => {
   const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16' | '4:3'>('1:1');
 
@@ -76,22 +79,35 @@ export const PromptForm: React.FC<PromptFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
-      {/* Label and Enhancer */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
+      {/* Label, Enhancer, Textarea, and Quick Prompts Component */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <label className="block text-sm font-semibold text-slate-200">
             તમારો પ્રોમ્પ્ટ અહીં લખો / Ad Prompt Text:
           </label>
-          <button
-            type="button"
-            onClick={onEnhancePrompt}
-            disabled={isEnhancing || !prompt.trim()}
-            className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 disabled:opacity-50 transition-all"
-            title="Enhance prompt with cinematic luxury details"
-          >
-            <Wand2 className={`w-3.5 h-3.5 ${isEnhancing ? 'animate-spin' : ''}`} />
-            {isEnhancing ? 'Enhancing...' : 'AI Prompt Magic'}
-          </button>
+          <div className="flex items-center gap-2">
+            {onOpenNanoBananaGallery && (
+              <button
+                type="button"
+                onClick={onOpenNanoBananaGallery}
+                className="flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 border border-amber-500/40 transition-all"
+                title="Open Nano Banana Pro Prompt Gallery"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>🍌 Nano Banana Prompts</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onEnhancePrompt}
+              disabled={isEnhancing || !prompt.trim()}
+              className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 disabled:opacity-50 transition-all"
+              title="Enhance prompt with cinematic luxury details"
+            >
+              <Wand2 className={`w-3.5 h-3.5 ${isEnhancing ? 'animate-spin' : ''}`} />
+              {isEnhancing ? 'Enhancing...' : 'AI Prompt Magic'}
+            </button>
+          </div>
         </div>
 
         <div className="relative">
@@ -103,6 +119,9 @@ export const PromptForm: React.FC<PromptFormProps> = ({
             className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500/80 rounded-xl p-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all resize-none font-sans"
           />
         </div>
+
+        {/* Modular Quick Prompts Dropdown & Chips */}
+        <QuickPrompts currentPrompt={prompt} onSelect={(p) => setPrompt(p)} onSelectPrompt={(p) => setPrompt(p)} className="pt-1" />
       </div>
 
       {/* AI Model Selector */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Layers, ImagePlus, LayoutGrid, LogOut, ShieldCheck } from 'lucide-react';
+import { Sparkles, Layers, ImagePlus, LayoutGrid, LogOut, ShieldCheck, Zap } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface NavbarProps {
@@ -12,6 +12,7 @@ interface NavbarProps {
   onOpenBatch: () => void;
   onOpenInpainting: () => void;
   onOpenCanvasStudio: () => void;
+  onOpenNanoBananaGallery?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -24,6 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenBatch,
   onOpenInpainting,
   onOpenCanvasStudio,
+  onOpenNanoBananaGallery,
 }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -49,8 +51,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Navigation & Auth Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Action Buttons */}
+          {onOpenNanoBananaGallery && (
+            <button
+              onClick={onOpenNanoBananaGallery}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-extrabold rounded-lg bg-gradient-to-r from-amber-500/20 via-amber-400/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 border border-amber-500/40 shadow-sm transition-all"
+              title="Nano Banana Pro Prompt Library"
+            >
+              <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
+              <span>🍌 Nano Banana Prompts</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenCanvasStudio}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 transition-colors"

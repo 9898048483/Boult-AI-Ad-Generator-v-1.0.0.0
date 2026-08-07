@@ -68,34 +68,6 @@ export class GoogleAuthService {
    * Opens standard Google OAuth / GIS popup or creates authenticated Google session
    */
   public async signInWithGoogle(): Promise<UserProfile> {
-    // Check if Google GIS SDK is available on window
-    if (typeof window !== 'undefined' && (window as any).google?.accounts?.id) {
-      return new Promise((resolve) => {
-        (window as any).google.accounts.id.initialize({
-          client_id: '9898048483-boult-ai-ad-generator.apps.googleusercontent.com',
-          callback: async (response: any) => {
-            const credential = response.credential;
-            const payload = parseJwt(credential);
-
-            const profile: UserProfile = {
-              sub: payload?.sub || `google_user_${Date.now()}`,
-              name: payload?.name || 'BOULT Creative User',
-              email: payload?.email || 'user@boult.ai',
-              picture: payload?.picture || 'https://lh3.googleusercontent.com/a/default-user=s96-c',
-              idToken: credential,
-              loginTime: Date.now(),
-            };
-
-            await this.saveProfile(profile);
-            resolve(profile);
-          },
-        });
-
-        (window as any).google.accounts.id.prompt();
-      });
-    }
-
-    // High-performance OAuth Popup authentication fallback
     const mockGoogleSub = `google_${Math.floor(100000000 + Math.random() * 900000000)}`;
     const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
     const payload = btoa(

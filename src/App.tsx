@@ -8,6 +8,7 @@ import { ApiSettingsModal } from './components/ApiSettingsModal';
 import { BatchGeneratorModal } from './components/BatchGeneratorModal';
 import { InpaintingStudioModal } from './components/InpaintingStudioModal';
 import { CanvasStudioModal } from './components/CanvasStudioModal';
+import { NanoBananaPromptsGallery } from './components/NanoBananaPromptsGallery';
 import { DEFAULT_PROMPT } from './data/presets';
 import { AdGenerationRequest, AdHistoryItem, PresetPrompt, UserProfile } from './types';
 import { Sparkles, X } from 'lucide-react';
@@ -45,14 +46,16 @@ export function App() {
   const [isBatchOpen, setIsBatchOpen] = useState<boolean>(false);
   const [isInpaintingOpen, setIsInpaintingOpen] = useState<boolean>(false);
   const [isCanvasStudioOpen, setIsCanvasStudioOpen] = useState<boolean>(false);
+  const [isNanoBananaOpen, setIsNanoBananaOpen] = useState<boolean>(false);
 
   // Initialize stored Google User Profile
   useEffect(() => {
     async function loadUserProfile() {
-      const profile = await googleAuthService.getStoredProfile();
-      if (profile) {
-        setUserProfile(profile);
+      let profile = await googleAuthService.getStoredProfile();
+      if (!profile) {
+        profile = await googleAuthService.signInWithGoogle();
       }
+      setUserProfile(profile);
     }
     loadUserProfile();
   }, []);
@@ -225,22 +228,17 @@ export function App() {
 
   // Generate Ad Submit with Google OAuth Proxy
   const handleGenerate = async (req: AdGenerationRequest) => {
-    if (!userProfile) {
-      // Auto sign in or show auth modal if user is not signed in
-      const autoProfile = await googleAuthService.signInWithGoogle();
-      if (autoProfile) {
-        setUserProfile(autoProfile);
-      } else {
-        setIsAuthPromptOpen(true);
-        return;
-      }
+    let activeProfile = userProfile;
+    if (!activeProfile) {
+      activeProfile = await googleAuthService.signInWithGoogle();
+      setUserProfile(activeProfile);
     }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const activeToken = userProfile?.idToken;
+      const activeToken = activeProfile?.idToken;
       const useCustomKey = await dbService.getSetting<boolean>('use_custom_gemini_api_key', false);
       const customKey = await dbService.getSetting<string>('custom_gemini_api_key', '');
 
@@ -302,6 +300,7 @@ export function App() {
         onOpenBatch={() => setIsBatchOpen(true)}
         onOpenInpainting={() => setIsInpaintingOpen(true)}
         onOpenCanvasStudio={() => setIsCanvasStudioOpen(true)}
+        onOpenNanoBananaGallery={() => setIsNanoBananaOpen(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -335,6 +334,7 @@ export function App() {
               isEnhancing={isEnhancing}
               selectedModel={selectedModel}
               onSelectModel={handleSelectModel}
+              onOpenNanoBananaGallery={() => setIsNanoBananaOpen(true)}
             />
           </div>
 
@@ -405,6 +405,15 @@ export function App() {
         onClose={() => setIsCanvasStudioOpen(false)}
         bgImageUrl={currentAd?.imageUrl}
         onSaveToGallery={handleSaveCanvasStudioOutput}
+      />
+
+      <NanoBananaPromptsGallery
+        isOpen={isNanoBananaOpen}
+        onClose={() => setIsNanoBananaOpen(false)}
+        onApplyPrompt={(newPromptText) => {
+          setPrompt(newPromptText);
+          setSelectedPresetId(undefined);
+        }}
       />
 
       {/* Unauthenticated Auth Prompt Modal */}
