@@ -11,6 +11,7 @@ import { CanvasStudioModal } from './components/CanvasStudioModal';
 import { DEFAULT_PROMPT } from './data/presets';
 import { AdGenerationRequest, AdHistoryItem, PresetPrompt } from './types';
 import { Sparkles } from 'lucide-react';
+import { dbService, AdRecord } from './services/dbService';
 
 export function App() {
   const [prompt, setPrompt] = useState<string>(DEFAULT_PROMPT);
@@ -29,7 +30,7 @@ export function App() {
     }
   });
 
-  // Custom user keys stored in localStorage
+  // Custom user keys stored in localStorage / dbService
   const [replicateToken, setReplicateToken] = useState<string>(() => localStorage.getItem('boult_replicate_token') || '');
   const [geminiKey, setGeminiKey] = useState<string>(() => localStorage.getItem('boult_gemini_key') || '');
 
@@ -41,6 +42,31 @@ export function App() {
   const [isBatchOpen, setIsBatchOpen] = useState<boolean>(false);
   const [isInpaintingOpen, setIsInpaintingOpen] = useState<boolean>(false);
   const [isCanvasStudioOpen, setIsCanvasStudioOpen] = useState<boolean>(false);
+
+  // Load IndexedDB data on initialization
+  const loadHistoryFromDB = async () => {
+    try {
+      const dbAds = await dbService.getAds();
+      if (dbAds && dbAds.length > 0) {
+        const formatted: AdHistoryItem[] = dbAds.map((ad) => ({
+          id: ad.id,
+          prompt: ad.prompt,
+          imageUrl: ad.imageUrl,
+          provider: ad.category || 'AI Model',
+          aspectRatio: (ad.aspectRatio as any) || '1:1',
+          createdAt: ad.createdAt,
+        }));
+        setHistory(formatted);
+        setCurrentAd(formatted[0]);
+      }
+    } catch (err) {
+      console.warn('IndexedDB initial load error:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadHistoryFromDB();
+  }, []);
 
   // Fetch backend config capabilities
   const fetchConfig = async () => {
@@ -77,12 +103,30 @@ export function App() {
     setGeminiKey(gemKey);
     localStorage.setItem('boult_replicate_token', repToken);
     localStorage.setItem('boult_gemini_key', gemKey);
+    dbService.saveSetting('replicateToken', repToken);
+    dbService.saveSetting('geminiKey', gemKey);
     setError(null);
   };
 
   const handleSelectPreset = (preset: PresetPrompt) => {
     setPrompt(preset.prompt);
     setSelectedPresetId(preset.id);
+  };
+
+  const saveAdToDBAndState = (newItem: AdHistoryItem) => {
+    setCurrentAd(newItem);
+    setHistory((prev) => [newItem, ...prev]);
+
+    dbService.saveAd({
+      id: newItem.id,
+      title: newItem.prompt.slice(0, 40),
+      category: newItem.provider,
+      imageUrl: newItem.imageUrl,
+      prompt: newItem.prompt,
+      createdAt: newItem.createdAt,
+      aspectRatio: newItem.aspectRatio,
+    });
+    dbService.addPromptHistory(newItem.prompt, newItem.provider);
   };
 
   const handleApplyInpaintingComposite = (compositeUrl: string) => {
@@ -95,8 +139,7 @@ export function App() {
       createdAt: Date.now(),
       hasProductOverlay: true,
     };
-    setCurrentAd(newItem);
-    setHistory((prev) => [newItem, ...prev]);
+    saveAdToDBAndState(newItem);
   };
 
   const handleSaveCanvasStudioOutput = (dataUrl: string) => {
@@ -109,8 +152,7 @@ export function App() {
       createdAt: Date.now(),
       hasProductOverlay: true,
     };
-    setCurrentAd(newItem);
-    setHistory((prev) => [newItem, ...prev]);
+    saveAdToDBAndState(newItem);
   };
 
   // Enhance prompt via server
@@ -173,6 +215,7 @@ export function App() {
 
         setCurrentAd(newItem);
         setHistory((prev) => [newItem, ...prev]);
+        saveAdToDBAndState(newItem);
       }
     } catch (err: any) {
       console.error('Generation error:', err);
@@ -272,6 +315,7 @@ export function App() {
         onSaveKeys={handleSaveKeys}
         hasServerReplicate={hasServerReplicate}
         hasServerGemini={hasServerGemini}
+        onBackupRestored={loadHistoryFromDB}
       />
 
       <BatchGeneratorModal

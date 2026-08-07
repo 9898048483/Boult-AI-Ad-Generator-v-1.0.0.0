@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, Key, Save, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Key, Save, CheckCircle2, AlertCircle, Info, Database, Download, Upload } from 'lucide-react';
+import { dbService } from '../services/dbService';
 
 interface ApiSettingsModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ApiSettingsModalProps {
   onSaveKeys: (replicateToken: string, geminiKey: string) => void;
   hasServerReplicate: boolean;
   hasServerGemini: boolean;
+  onBackupRestored?: () => void;
 }
 
 export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
@@ -19,10 +21,13 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
   onSaveKeys,
   hasServerReplicate,
   hasServerGemini,
+  onBackupRestored,
 }) => {
   const [repTokenInput, setRepTokenInput] = useState(replicateToken);
   const [gemKeyInput, setGemKeyInput] = useState(geminiKey);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -34,6 +39,47 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
       setSavedSuccess(false);
       onClose();
     }, 800);
+  };
+
+  const handleExportBackup = async () => {
+    try {
+      const backupJson = await dbService.exportFullBackup();
+      const blob = new Blob([backupJson], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `boult_ad_studio_backup_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setBackupMessage('Database exported successfully!');
+      setTimeout(() => setBackupMessage(null), 3000);
+    } catch (err) {
+      setBackupMessage('Export failed.');
+      setTimeout(() => setBackupMessage(null), 3000);
+    }
+  };
+
+  const handleImportBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const success = await dbService.importFullBackup(text);
+      if (success) {
+        setBackupMessage('Backup imported successfully!');
+        if (onBackupRestored) onBackupRestored();
+      } else {
+        setBackupMessage('Failed to parse backup JSON.');
+      }
+    } catch (err) {
+      setBackupMessage('Failed to import backup.');
+    } finally {
+      setTimeout(() => setBackupMessage(null), 3000);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -104,6 +150,47 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
               className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 font-mono"
             />
             <p className="text-[11px] text-slate-500 mt-1">Required for Gemini Imagen 3 image generation & prompt enhancement.</p>
+          </div>
+
+          {/* Database Sync & Backup */}
+          <div className="pt-2 border-t border-slate-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <Database className="w-3.5 h-3.5 text-amber-400" />
+                IndexedDB Database Backup & Restore
+              </span>
+            </div>
+            
+            {backupMessage && (
+              <p className="text-[11px] font-semibold text-amber-400 animate-pulse">{backupMessage}</p>
+            )}
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={handleExportBackup}
+                className="py-2 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-200 font-medium flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+                <span>Export Backup</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="py-2 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-200 font-medium flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <Upload className="w-3.5 h-3.5 text-amber-400" />
+                <span>Restore JSON</span>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleImportBackup}
+                className="hidden"
+              />
+            </div>
           </div>
 
           <div className="pt-2 flex items-center justify-end gap-3">

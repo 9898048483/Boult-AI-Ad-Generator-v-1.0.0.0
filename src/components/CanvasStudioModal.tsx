@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   Sun,
   ShieldAlert,
-  LayoutGrid
+  LayoutGrid,
+  Loader2
 } from 'lucide-react';
 import {
   CanvasLayer,
@@ -26,6 +27,8 @@ import {
   AspectRatioType,
   ASPECT_RATIO_PRESETS,
 } from '../utils/canvasExporter';
+import { saveToAndroidGallery } from '../utils/androidStorage';
+import { ExportWorkerPayload, ExportWorkerResponse } from '../workers/canvasExport.worker';
 
 interface CanvasStudioModalProps {
   isOpen: boolean;
@@ -97,6 +100,8 @@ export const CanvasStudioModal: React.FC<CanvasStudioModalProps> = ({
   const [selectedAspects, setSelectedAspects] = useState<AspectRatioType[]>(['1:1', '9:16', '16:9', '4:3']);
   const [previewAspect, setPreviewAspect] = useState<AspectRatioType>('1:1');
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [exportProgress, setExportProgress] = useState<number>(0);
+  const [toastNotification, setToastNotification] = useState<string | null>(null);
 
   // Canvas ref & preview URL
   const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
@@ -188,19 +193,89 @@ export const CanvasStudioModal: React.FC<CanvasStudioModalProps> = ({
     }
   };
 
-  // Trigger batch export
+  // Trigger batch export with Web Worker & Native Storage
   const handleExportBatch = async () => {
     if (selectedAspects.length === 0) return;
     setIsExporting(true);
+    setExportProgress(15);
+    setToastNotification(null);
+
     try {
-      await batchExportCanvas(bgImageUrl, layers, adjustments, exportFormat, selectedAspects);
-      if (previewDataUrl && onSaveToGallery) {
-        onSaveToGallery(previewDataUrl);
-      }
+      const titleLayer = layers.find((l) => l.type === 'text') || layers[0];
+      const taglineLayer = layers.find((l) => l.type === 'badge' || l.type === 'price');
+
+      const worker = new Worker(new URL('../workers/canvasExport.worker.ts', import.meta.url), { type: 'module' });
+
+      const payload: ExportWorkerPayload = {
+        id: `export_${Date.now()}`,
+        title: titleLayer?.text || 'BOULT AUDIO PRO',
+        tagline: taglineLayer?.text || 'Redefining Sound Standards',
+        brandName: 'BOULT AI',
+        imageUrl: bgImageUrl,
+        ratios: selectedAspects as any,
+        format: exportFormat,
+        quality: 0.95,
+        accentColor: '#f59e0b',
+      };
+
+      setExportProgress(45);
+
+      worker.postMessage(payload);
+
+      worker.onmessage = async (event: MessageEvent<ExportWorkerResponse>) => {
+        const { status, outputs, error } = event.data;
+        setExportProgress(85);
+
+        if (status === 'success' && outputs && outputs.length > 0) {
+          let savedCount = 0;
+          let lastPath = '';
+
+          for (const item of outputs) {
+            const fileName = `BOULT_Ad_${item.ratio.replace(':', 'x')}_${Date.now()}.${exportFormat === 'pdf' ? 'pdf' : exportFormat}`;
+            const res = await saveToAndroidGallery(item.dataUrl, fileName);
+            if (res.success) {
+              savedCount++;
+              if (res.path) lastPath = res.path;
+            }
+          }
+
+          setExportProgress(100);
+          const toastMsg = lastPath
+            ? `Exported ${savedCount} ratios natively to ${lastPath}`
+            : `Exported ${savedCount} multi-ratio campaign assets!`;
+          setToastNotification(toastMsg);
+
+          if (previewDataUrl && onSaveToGallery) {
+            onSaveToGallery(previewDataUrl);
+          }
+        } else {
+          console.warn('Worker error fallback:', error);
+          await batchExportCanvas(bgImageUrl, layers, adjustments, exportFormat, selectedAspects);
+          setToastNotification('Multi-ratio export completed successfully!');
+        }
+
+        setTimeout(() => {
+          setIsExporting(false);
+          setExportProgress(0);
+        }, 600);
+
+        worker.terminate();
+      };
+
+      worker.onerror = async (err) => {
+        console.warn('Worker standard fallback trigger:', err);
+        await batchExportCanvas(bgImageUrl, layers, adjustments, exportFormat, selectedAspects);
+        setToastNotification('Multi-ratio export completed successfully!');
+        setIsExporting(false);
+        setExportProgress(0);
+        worker.terminate();
+      };
     } catch (err) {
       console.error('Batch export failed:', err);
-    } finally {
+      await batchExportCanvas(bgImageUrl, layers, adjustments, exportFormat, selectedAspects);
+      setToastNotification('Multi-ratio export completed successfully!');
       setIsExporting(false);
+      setExportProgress(0);
     }
   };
 
@@ -230,8 +305,39 @@ export const CanvasStudioModal: React.FC<CanvasStudioModalProps> = ({
           </button>
         </div>
 
+        {/* Toast Notification Banner */}
+        {toastNotification && (
+          <div className="p-3 bg-emerald-500/15 border border-emerald-500/30 rounded-xl flex items-center gap-2 text-xs text-emerald-300 font-semibold animate-in fade-in duration-200">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="truncate">{toastNotification}</span>
+          </div>
+        )}
+
         {/* Studio Grid Workspace */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 overflow-y-auto min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 overflow-y-auto min-h-0 relative">
+          {/* High-Tech Worker Spinner Overlay */}
+          {isExporting && (
+            <div className="absolute inset-0 z-40 bg-slate-950/85 backdrop-blur-md rounded-xl flex flex-col items-center justify-center p-6 space-y-4 border border-amber-500/30">
+              <div className="relative flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-amber-400 animate-spin" />
+                <span className="absolute font-mono text-xs font-black text-amber-300">{exportProgress}%</span>
+              </div>
+              <div className="text-center space-y-1">
+                <h4 className="font-display font-bold text-sm text-slate-100">
+                  OffscreenCanvas Worker Engine Active
+                </h4>
+                <p className="text-xs text-slate-400">
+                  Rendering multi-ratio (1:1, 9:16, 16:9, 4:3) images in background worker thread...
+                </p>
+              </div>
+              <div className="w-64 h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300"
+                  style={{ width: `${exportProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
           {/* Left Panel: Preview Canvas */}
           <div className="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-col items-center justify-between relative overflow-hidden">
             {/* Aspect Ratio Preview Toggles */}

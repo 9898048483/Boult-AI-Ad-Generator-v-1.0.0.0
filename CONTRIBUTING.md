@@ -1,36 +1,59 @@
 # Contributing to BOULT AI Ad Generator Suite
 
-Thank you for your interest in contributing! This project is an open-source cross-platform suite for AI-powered commercial image generation.
+Thank you for your interest in contributing to the **BOULT AI Ad Generator Suite** (`@9898048483/boult-ai-ad-generator`)! We welcome contributions from open-source developers, desktop engineers, mobile developers, and AI researchers.
 
-## 🚀 Getting Started
+---
 
-1. **Fork & Clone repository:**
-   ```bash
-   git clone https://github.com/aayush-marketing/Boult-AI-Ad-Generator.git
-   cd Boult-AI-Ad-Generator
-   ```
+## 📋 Code of Conduct
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+We are committed to providing a welcoming, respectful, and inclusive community. Please treat all contributors with respect, deliver constructive feedback, and maintain high standards of technical excellence.
 
-3. **Run local development server:**
-   ```bash
-   npm run dev
-   ```
+---
 
-4. **Run CLI tool locally:**
-   ```bash
-   node ./bin/boult-cli.js generate -p "BOULT active noise cancelling headphones on dark velvet background"
-   ```
+## 🛠️ Development Workflow
 
-## 🖥️ Multi-OS Desktop & Mobile Builds
+### 1. Fork & Clone Repository
 
-- **Linux / macOS:** Run `npm run build:desktop` or `./scripts/build-desktop.sh`
-- **Windows:** Run `scripts\build-desktop.bat`
-- **Android APK:** Run `npm run build:android` or `./scripts/build-android.sh`
+```bash
+git clone https://github.com/9898048483/boult-ai-ad-generator.git
+cd boult-ai-ad-generator
+```
 
-## 💬 Code Style & Pull Requests
-- Keep TypeScript code modular and strictly typed.
-- Submit clean PRs referencing relevant issue IDs.
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Run Development Server
+
+```bash
+npm run dev
+```
+
+### 4. Code Quality & Verification
+
+Before submitting pull requests, run static analysis and verify compilation:
+
+```bash
+# Type check and lint
+npm run lint
+
+# Verify full production build
+npm run build
+```
+
+---
+
+## 📦 Submitting Pull Requests (PRs)
+
+1. Create a descriptive feature branch: `git checkout -b feature/your-feature-name`.
+2. Commit changes with clean conventional commit messages (e.g. `feat(canvas): add web worker export`, `fix(android): scope permissions`).
+3. Ensure all CI checks and linter rules pass (`npm run lint`).
+4. Push your branch and open a Pull Request against the `main` branch.
+
+---
+
+## 📄 License
+
+By contributing to this repository, you agree that your contributions will be licensed under the [MIT License](LICENSE).
