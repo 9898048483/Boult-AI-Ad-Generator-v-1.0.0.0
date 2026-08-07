@@ -6,6 +6,7 @@ import {
   Copy,
   Check,
   Star,
+  Heart,
   Plus,
   Trash2,
   Zap,
@@ -145,11 +146,11 @@ const CATEGORY_MAP: Record<string, { name: string; icon: any; color: string; bg:
     border: 'border-blue-500/30'
   },
   favorites: {
-    name: '⭐ My Favorites',
-    icon: Star,
-    color: 'text-yellow-400',
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/30'
+    name: '❤️ My Favorites',
+    icon: Heart,
+    color: 'text-rose-400',
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/30'
   },
   custom: {
     name: '✍️ My Custom Prompts',
@@ -310,9 +311,9 @@ export const NanoBananaPromptsGallery: React.FC<NanoBananaPromptsGalleryProps> =
   // Dynamic list of categories present in current prompts dataset
   const availableCategories = useMemo(() => {
     const defaultCats = [
-      'all', 'product', 'cinematic', 'ecommerce', 'cyberpunk', 'fashion',
+      'all', 'favorites', 'custom', 'product', 'cinematic', 'ecommerce', 'cyberpunk', 'fashion',
       'luxury', 'food', 'automotive', 'cosmetics', 'tech', 'architecture',
-      'sports', 'realestate', 'gaming', 'socialmedia', 'favorites', 'custom'
+      'sports', 'realestate', 'gaming', 'socialmedia'
     ];
     const present = new Set<string>(defaultCats);
 
@@ -517,7 +518,7 @@ export const NanoBananaPromptsGallery: React.FC<NanoBananaPromptsGalleryProps> =
                 <IconComp className={`w-3.5 h-3.5 ${isActive ? cat.color : 'text-slate-400'}`} />
                 <span>{cat.name}</span>
                 {cat.id === 'favorites' && favoriteIds.length > 0 && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-yellow-500/20 text-yellow-300 ml-0.5">
+                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 ml-0.5">
                     {favoriteIds.length}
                   </span>
                 )}
@@ -541,9 +542,19 @@ export const NanoBananaPromptsGallery: React.FC<NanoBananaPromptsGalleryProps> =
             </div>
           ) : filteredPrompts.length === 0 ? (
             <div className="py-12 text-center text-slate-500 space-y-2">
-              <Zap className="w-8 h-8 text-slate-600 mx-auto animate-bounce" />
-              <p className="text-sm font-semibold">No prompts found matching your filter.</p>
-              <p className="text-xs text-slate-600">Try clearing your search query or creating a custom prompt.</p>
+              {activeCategory === 'favorites' ? (
+                <>
+                  <Heart className="w-8 h-8 text-rose-500/60 mx-auto animate-bounce" />
+                  <p className="text-sm font-semibold text-slate-300">No favorite prompts saved yet.</p>
+                  <p className="text-xs text-slate-500">Click the heart icon on any prompt card to save it to your favorites.</p>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-8 h-8 text-slate-600 mx-auto animate-bounce" />
+                  <p className="text-sm font-semibold">No prompts found matching your filter.</p>
+                  <p className="text-xs text-slate-600">Try clearing your search query or creating a custom prompt.</p>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -583,12 +594,12 @@ export const NanoBananaPromptsGallery: React.FC<NanoBananaPromptsGalleryProps> =
                             onClick={(e) => handleToggleFavorite(p.id, e)}
                             className={`p-1.5 rounded-lg border transition-all ${
                               isFav
-                                ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                                : 'text-slate-500 hover:text-yellow-400 border-transparent hover:border-slate-800'
+                                ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                                : 'text-slate-500 hover:text-rose-400 border-transparent hover:border-slate-800'
                             }`}
                             title={isFav ? 'Remove from favorites' : 'Save to favorites'}
                           >
-                            <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-yellow-400' : ''}`} />
+                            <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
                           </button>
 
                           {p.isCustom && (
